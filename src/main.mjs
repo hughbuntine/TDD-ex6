@@ -24,3 +24,8 @@ function main() {
 }
 
 main();
+
+// in the command line put the following command:
+// node src/main.mjs "patterns/1beaconpredecessor.rle" 1000
+
+// obviously put however many generations and any patterns you like
