@@ -1,9 +1,10 @@
+import fs from 'fs';
+
 export default class Universe {
     length;
     height;
     space;
     nextSpace;
-    generations;
 
     constructor(length, height) {
         this.length = length;
@@ -93,6 +94,7 @@ export default class Universe {
 
         // Expand after computing next generation
         this.addSpaces();
+
     }
 
     print() {
@@ -142,6 +144,8 @@ export default class Universe {
     }
 
     parseRLE(file){
+        file = this.readRLEFile(file);
+
         let linesFull = file.split('\n');
         let lines = new Array();
 
@@ -154,6 +158,11 @@ export default class Universe {
 
         let width = parseInt(lines[0].split(' ')[2].replace(',', ''));
         let height = parseInt(lines[0].split(' ')[5].replace(',', ''));
+
+        this.height = height;
+        this.length = width;
+
+        this.space = new Array(this.height).fill(null).map(() => new Array(this.length).fill(false));
 
         lines.shift();
 
@@ -196,9 +205,47 @@ export default class Universe {
             }
             i++;
         }
-        this.height = height;
-        this.length = width;
+        
+    }
 
-        console.log(this.print());
+    readRLEFile(filePath) {
+        try {
+            const data = fs.readFileSync(filePath, 'utf8'); // Read file as string
+            return data;
+        } catch (err) {
+            console.error("Error reading file:", err);
+            return null;
+        }
+    }
+
+    writeRLEFile(filePath) {
+        let data = "x = " + this.length + ", y = " + this.height + ", rule = B3/S23\n";
+        for (let y = 0; y < this.height; y++) {
+            let row = "";
+            let count = 0;
+            for (let x = 0; x < this.length; x++) {
+                if (this.space[y][x]) {
+                    if (count > 0) {
+                        row += count;
+                        count = 0;
+                    }
+                    row += "o";
+                } else {
+                    if (count > 0) {
+                        row += count;
+                        count = 0;
+                    }
+                    row += "b";
+                }
+            }
+            data += row + "$\n";
+        }
+        data += "!";
+
+        try {
+            fs.writeFileSync(filePath, data);
+        } catch (err) {
+            console.error("Error writing file:", err);
+        }
     }
 }

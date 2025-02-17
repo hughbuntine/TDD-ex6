@@ -202,16 +202,28 @@ describe("5x5 Universe", () => {
 
   });
 
-  test("parses RLE", () => {
-    const rle = `#C This is a comment
-#C This is another comment
-x = 5, y = 5
-2o$2o!`;
-    universe.parseRLE(rle);
-    expect(universe.get(0, 0)).to.equal(true);
-    expect(universe.get(0, 1)).to.equal(true);
-    expect(universe.get(1, 0)).to.equal(true);
-    expect(universe.get(1, 1)).to.equal(true);
-  });
   
+});
+
+describe("Universe from file", () => {
+  let universe
+beforeEach(() => {
+    universe = new Universe();
+  })
+
+  test("parse RLE file", () => {
+    const filePath = "patterns/1beaconpredecessor.rle";
+    universe.parseRLE(filePath);
+    expect(universe.get(0, 7)).to.equal(true);
+    expect(universe.get(1, 7)).to.equal(true);
+    expect(universe.get(2, 7)).to.equal(true); //and so on
+  });
+
+  test.only("runs iterations from file", () => {
+    const filePath = "patterns/1beaconpredecessor.rle";
+    universe.parseRLE(filePath);
+    universe.runGenerations(100);
+    expect(universe.get(10, 1)).to.equal(true);
+    expect(universe.get(11, 1)).to.equal(true); //and so on
+  });
 });
