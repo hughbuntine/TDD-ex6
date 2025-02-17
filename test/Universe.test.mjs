@@ -171,6 +171,47 @@ describe("5x5 Universe", () => {
     expect(universe.get(4, 3)).to.equal(true);
   });
 
+  test("runs lots of generations", () => {
+    universe.setTrue(1, 2);
+    universe.setTrue(2, 2);
+    universe.setTrue(3, 2);
+    universe.setTrue(2, 3);
+    universe.setTrue(3, 3);
+    universe.setTrue(4, 3);
+    universe.runGenerations(100);
+    expect(universe.get(1, 2)).to.equal(true);
+    expect(universe.get(2, 2)).to.equal(true);
+    expect(universe.get(3, 2)).to.equal(true);
+    expect(universe.get(2, 3)).to.equal(true);
+    expect(universe.get(3, 3)).to.equal(true);
+    expect(universe.get(4, 3)).to.equal(true);
+    universe.runGenerations(101);
+    expect(universe.get(1, 2)).to.equal(true);
+    expect(universe.get(2, 2)).to.equal(false);
+    expect(universe.get(3, 2)).to.equal(false);
+    expect(universe.get(2, 3)).to.equal(false);
+    expect(universe.get(3, 3)).to.equal(false);
+    expect(universe.get(4, 3)).to.equal(true);
+    universe.runGenerations(101);
+    expect(universe.get(1, 2)).to.equal(true);
+    expect(universe.get(2, 2)).to.equal(true);
+    expect(universe.get(3, 2)).to.equal(true);
+    expect(universe.get(2, 3)).to.equal(true);
+    expect(universe.get(3, 3)).to.equal(true);
+    expect(universe.get(4, 3)).to.equal(true);
 
+  });
+
+  test("parses RLE", () => {
+    const rle = `#C This is a comment
+#C This is another comment
+x = 5, y = 5
+2o$2o!`;
+    universe.parseRLE(rle);
+    expect(universe.get(0, 0)).to.equal(true);
+    expect(universe.get(0, 1)).to.equal(true);
+    expect(universe.get(1, 0)).to.equal(true);
+    expect(universe.get(1, 1)).to.equal(true);
+  });
   
 });

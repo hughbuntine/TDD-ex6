@@ -3,6 +3,7 @@ export default class Universe {
     height;
     space;
     nextSpace;
+    generations;
 
     constructor(length, height) {
         this.length = length;
@@ -132,5 +133,72 @@ export default class Universe {
         } else {
             this.nextSpace[y][x] = aliveNeighbours === 3;
         }
+    }
+
+    runGenerations(generations) {
+        for (let i = 0; i < generations; i++) {
+            this.tick();
+        }
+    }
+
+    parseRLE(file){
+        let linesFull = file.split('\n');
+        let lines = new Array();
+
+        // Delete comments
+        for (let line in linesFull){
+            if (linesFull[line][0] !== '#'){
+                lines.push(linesFull[line]);
+            }
+        }
+
+        let width = parseInt(lines[0].split(' ')[2].replace(',', ''));
+        let height = parseInt(lines[0].split(' ')[5].replace(',', ''));
+
+        lines.shift();
+
+        let x = 0;
+        let y = 0;
+        let count = 0;
+        let i = 0;
+        while (i < lines.length) {
+
+            let line = lines[i];
+            
+            for (let j = 0; j < line.length; j++) {
+                let char = line[j];
+                if (char === '!') {
+                    break;
+                }
+                if (char === '$') {
+                    y++;
+                    x = 0;
+                } else if (char === 'b') {
+                    if (count == 0){
+                        count = 1;
+                    }
+                    for (let k = 0; k < count; k++) {
+                        x++;
+                    }
+                    count = 0;
+                } else if (char === 'o') {
+                    if (count == 0){
+                        count = 1;
+                    }
+                    for (let k = 0; k < count; k++) {
+                        this.setTrue(x, y);
+                        x++;
+                    }
+                    count = 0;
+                } else if (char === '0' || char === '1' || char === '2' || char === '3' || char === '4' || char === '5' || char === '6' || char === '7' || char === '8' || char === '9') {
+                    count = count * 10 + parseInt(char);
+                }
+            }
+            i++;
+        }
+        this.height = height;
+        this.length = width;
+
+        console.log(this.print());
     }
 }
