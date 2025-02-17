@@ -47,9 +47,10 @@ describe("5x5 Universe", () => {
     expect(universe.nextSpace.height).to.equal(universe.space.height);
   });
 
-  test("can add height to top of space", () => {
+  test("can add row to top of space", () => {
     universe.addRowToTop();
     expect(universe.space.length).to.equal(6);
+    expect(universe.height).to.equal(6);
   });
 
   test("new row is filled with false", () => {
@@ -59,9 +60,9 @@ describe("5x5 Universe", () => {
     }
   });
 
-  test("can add height to bottom of space", () => {
+  test("can add row to bottom of space", () => {
     universe.addRowToBottom();
-    expect(universe.space.length).to.equal(6);
+    expect(universe.height).to.equal(6);
   });
 
   test("new row is filled with false", () => {
@@ -70,4 +71,72 @@ describe("5x5 Universe", () => {
       expect(universe.space[5][i]).to.equal(false);
     }
   });
+
+  test("can add column to left of space", () => {
+    universe.addColumnToLeft();
+    expect(universe.space[0].length).to.equal(6);
+    expect(universe.length).to.equal(6);
+  });
+
+  test("new column is filled with false", () => {
+    universe.addColumnToLeft();
+    for(let i = 0; i < universe.height; i++) {
+      expect(universe.space[i][0]).to.equal(false);
+    }
+  });
+
+  test("can add column to right of space", () => {
+    universe.addColumnToRight();
+    expect(universe.length).to.equal(6);
+  });
+
+  test("new column is filled with false", () => {
+    universe.addColumnToRight();
+    for(let i = 0; i < universe.height; i++) {
+      expect(universe.space[i][5]).to.equal(false);
+    }
+  });
+
+  test("tick makes space bigger if needed (length)", () => {
+    universe.setTrue(1, 0);
+    universe.tick();
+    expect(universe.length).to.equal(6);
+    expect(universe.height).to.equal(5);
+  });
+
+  test("tick makes space bigger if needed (height)", () => {
+    universe.setTrue(0, 1);
+    universe.tick();
+    expect(universe.length).to.equal(5);
+    expect(universe.height).to.equal(6);
+  });
+
+  test("print prints the space", () => {
+    universe.setTrue(0, 0);
+    universe.setTrue(1, 1);
+    universe.setTrue(2, 2);
+    universe.setTrue(3, 3);
+    universe.setTrue(4, 4);
+    const expected = "X....\n.X...\n..X..\n...X.\n....X\n";
+    expect(universe.print()).to.equal(expected);
+  });
+
+  test("print after resize tick", () => {
+    universe.setTrue(0, 0);
+    universe.setTrue(1, 1);
+    universe.setTrue(2, 2);
+    universe.setTrue(3, 3);
+    universe.setTrue(4, 4);
+    universe.tick();
+    const expected = ".......\n.......\n..X....\n...X...\n....X..\n.......\n.......\n";
+    expect(universe.print()).to.equal(expected);
+  });
+
+  test("single cell dies after tick", () => {
+    universe.setTrue(2, 2);
+    universe.tick();
+    expect(universe.space[2][2]).to.equal(false);
+  });
+
+  
 });
