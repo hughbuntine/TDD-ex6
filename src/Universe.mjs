@@ -5,44 +5,28 @@ export default class Universe {
     nextSpace;
 
     constructor(length, height) {
-        // Create a 2D array
-        this.space = new Array(length);
-        for (let i = 0; i < length; i++) {
-            this.space[i] = new Array(height);
-        }
-
         this.length = length;
         this.height = height;
 
-        // Initialize all cells to false
-        for (let i = 0; i < length; i++) {
-            for (let j = 0; j < height; j++) {
-                this.space[i][j] = false;
-            }
-        }
+        // Create and initialize a 2D array
+        this.space = new Array(height).fill(null).map(() => new Array(length).fill(false));
     }
 
     setTrue(x, y) {
-        this.space[x][y] = true;
+        this.space[y][x] = true;
     }
 
     setFalse(x, y) {
-        this.space[x][y] = false;
+        this.space[y][x] = false;
+    }
+
+    get(x, y) {
+        return this.space[y][x];
     }
 
     createNextSpace() {
-        // Create a 2D array
-        this.nextSpace = new Array(this.height);
-        for (let i = 0; i < this.height; i++) {
-            this.nextSpace[i] = new Array(this.length);
-        }
-
-        // Initialize all cells to false
-        for (let i = 0; i < this.height; i++) {
-            for (let j = 0; j < this.length; j++) {
-                this.nextSpace[i][j] = false;
-            }
-        }
+        // Create the next generation grid with the correct dimensions
+        this.nextSpace = new Array(this.height).fill(null).map(() => new Array(this.length).fill(false));
     }
 
     addRowToTop() {
@@ -69,80 +53,72 @@ export default class Universe {
         this.length++;
     }
 
-    addSpaces(){
-            let addToTop = false;
-            let addToBottom = false;
-            let addToLeft = false;  
-            let addToRight = false;
+    addSpaces() {
+        let addToTop = false;
+        let addToBottom = false;
+        let addToLeft = false;
+        let addToRight = false;
 
-            for (let i = 0; i < this.length; i++) {
-                for (let j = 0; j < this.height; j++) {
-                    if (this.space[i][j] == true) {
-                        if (i == 0) {
-                            addToTop = true;
-                        }
-                        if (i == this.length - 1) {
-                            addToBottom = true;
-                        }
-                        if (j == 0) {
-                            addToLeft = true;
-                        }
-                        if (j == this.height - 1) {
-                            addToRight = true;
-                        }
-                    }
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.length; x++) {
+                if (this.space[y][x]) {
+                    if (y === 0) addToTop = true;
+                    if (y === this.height - 1) addToBottom = true;
+                    if (x === 0) addToLeft = true;
+                    if (x === this.length - 1) addToRight = true;
                 }
             }
+        }
 
-            if (addToTop) {
-                this.addRowToTop();
-            }
-            if (addToBottom) {
-                this.addRowToBottom();
-            }
-            if (addToLeft) {
-                this.addColumnToLeft();
-            }
-            if (addToRight) {
-                this.addColumnToRight();
-            }
+        if (addToTop) this.addRowToTop();
+        if (addToBottom) this.addRowToBottom();
+        if (addToLeft) this.addColumnToLeft();
+        if (addToRight) this.addColumnToRight();
     }
-    
-    tick(){
-        this.addSpaces();
-        this.createNextSpace(); // create the space for the next generation
+
+    tick() {
+        this.createNextSpace();
 
         // Update each cell in the next generation
-        for (let i = 0; i < this.height; i++) {
-            for (let j = 0; j < this.length; j++) {
-                this.updateCellNextGen(i, j);
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.length; x++) {
+                this.updateCellNextGen(x, y);
             }
         }
 
         // Update the current space
         this.space = JSON.parse(JSON.stringify(this.nextSpace));
         this.nextSpace = null;
+
+        // Expand after computing next generation
+        this.addSpaces();
     }
-    
-    print(){
+
+    print() {
         let toBePrinted = "";
-        for (let i = 0; i < this.length; i++) {
+        for (let y = 0; y < this.height; y++) {
             let row = "";
-            for (let j = 0; j < this.height; j++) {
-                row += this.space[i][j] ? "X" : ".";
+            for (let x = 0; x < this.length; x++) {
+                row += this.space[y][x] ? "X" : ".";
             }
             toBePrinted += row + "\n";
         }
         return toBePrinted;
     }
 
-    updateCellNextGen(x, y){
+    updateCellNextGen(x, y) {
         let aliveNeighbours = 0;
 
         // Get alive neighbours
-        for (let i = x - 1; i <= x + 1; i++) {
-            for (let j = y - 1; j <= y + 1; j++) {
-                if (i >= 0 && i < this.height && j >= 0 && j < this.length && (i != x || j != y)) {
+        for (let i = y - 1; i <= y + 1; i++) {
+            for (let j = x - 1; j <= x + 1; j++) {
+                if (
+                    i >= 0 &&
+                    i < this.height &&
+                    j >= 0 &&
+                    j < this.length &&
+                    (i !== y || j !== x)
+                ) {
                     if (this.space[i][j]) {
                         aliveNeighbours++;
                     }
@@ -150,20 +126,11 @@ export default class Universe {
             }
         }
 
-        // Update cell
-        if (this.space[x][y]) { // if alive
-            if (aliveNeighbours < 2 || aliveNeighbours > 3) {
-                this.nextSpace[x][y] = false;
-            } else {
-                this.nextSpace[x][y] = true;
-            }
-        } else { // if dead
-            if (aliveNeighbours == 3) {
-                this.nextSpace[x][y] = true;
-            } else {
-                this.nextSpace[x][y] = false;
-            }
+        // Apply Game of Life rules
+        if (this.space[y][x]) {
+            this.nextSpace[y][x] = aliveNeighbours === 2 || aliveNeighbours === 3;
+        } else {
+            this.nextSpace[y][x] = aliveNeighbours === 3;
         }
     }
- 
 }

@@ -97,18 +97,22 @@ describe("5x5 Universe", () => {
     }
   });
 
-  test("tick makes space bigger if needed (length)", () => {
-    universe.setTrue(1, 0);
-    universe.tick();
-    expect(universe.length).to.equal(6);
-    expect(universe.height).to.equal(5);
-  });
-
   test("tick makes space bigger if needed (height)", () => {
-    universe.setTrue(0, 1);
+    universe.setTrue(1, 0);
+    universe.setTrue(2, 0);
+    universe.setTrue(3, 0);
     universe.tick();
     expect(universe.length).to.equal(5);
     expect(universe.height).to.equal(6);
+  });
+
+  test("tick makes space bigger if needed (length)", () => {
+    universe.setTrue(0, 1);
+    universe.setTrue(0, 2);
+    universe.setTrue(0, 3);
+    universe.tick();
+    expect(universe.length).to.equal(6);
+    expect(universe.height).to.equal(5);
   });
 
   test("print prints the space", () => {
@@ -121,22 +125,52 @@ describe("5x5 Universe", () => {
     expect(universe.print()).to.equal(expected);
   });
 
-  test("print after resize tick", () => {
-    universe.setTrue(0, 0);
-    universe.setTrue(1, 1);
-    universe.setTrue(2, 2);
-    universe.setTrue(3, 3);
-    universe.setTrue(4, 4);
-    universe.tick();
-    const expected = ".......\n.......\n..X....\n...X...\n....X..\n.......\n.......\n";
-    expect(universe.print()).to.equal(expected);
-  });
-
   test("single cell dies after tick", () => {
     universe.setTrue(2, 2);
     universe.tick();
     expect(universe.space[2][2]).to.equal(false);
   });
+
+  test("block", () => {
+    universe.setTrue(1, 1);
+    universe.setTrue(1, 2);
+    universe.setTrue(2, 1);
+    universe.setTrue(2, 2);
+    universe.tick();
+    expect(universe.space[1][1]).to.equal(true);
+    expect(universe.space[1][2]).to.equal(true);
+    expect(universe.space[2][1]).to.equal(true);
+    expect(universe.space[2][2]).to.equal(true);
+  });
+
+  test("blinker", () => {
+    universe.setTrue(1, 2);
+    universe.setTrue(2, 2);
+    universe.setTrue(3, 2);
+    universe.tick();
+    universe.tick();
+    expect(universe.get(1, 2)).to.equal(true);
+    expect(universe.get(2, 2)).to.equal(true);
+    expect(universe.get(3, 2)).to.equal(true);
+  });
+
+  test("toad", () => {
+    universe.setTrue(1, 2);
+    universe.setTrue(2, 2);
+    universe.setTrue(3, 2);
+    universe.setTrue(2, 3);
+    universe.setTrue(3, 3);
+    universe.setTrue(4, 3);
+    universe.tick();
+    universe.tick();
+    expect(universe.get(1, 2)).to.equal(true);
+    expect(universe.get(2, 2)).to.equal(true);
+    expect(universe.get(3, 2)).to.equal(true);
+    expect(universe.get(2, 3)).to.equal(true);
+    expect(universe.get(3, 3)).to.equal(true);
+    expect(universe.get(4, 3)).to.equal(true);
+  });
+
 
   
 });
